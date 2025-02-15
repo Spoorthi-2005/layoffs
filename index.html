@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layoff Prediction</title>
+    <style>
+        body {
+            background: url('https://source.unsplash.com/1600x900/?technology,office') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 50px;
+            width: 50%;
+        }
+        label, select, input {
+            font-size: 18px;
+            margin: 10px;
+            display: block;
+            width: 90%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+            width: 95%;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .dashboard-btn {
+            background: #007bff;
+            margin-top: 15px;
+        }
+        .dashboard-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Layoff Prediction System</h1>
+        <form id="layoffForm">
+            <label for="company">Select Company:</label>
+            <select id="company" name="company">
+                {% for company in companies %}
+                    <option value="{{ company }}">{{ company }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="industry">Select Industry:</label>
+            <select id="industry" name="industry">
+                {% for industry in industries %}
+                    <option value="{{ industry }}">{{ industry }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="year">Select Year:</label>
+            <input type="number" id="year" name="year" min="2000" max="2030" required>
+
+            <button type="button" onclick="predictLayoffs()">Predict Layoffs</button>
+        </form>
+
+        <h2 id="result"></h2>
+
+        <button class="dashboard-btn" onclick="window.open('https://app.powerbi.com/reportEmbed?reportId=ca074720-d61c-4113-9717-36633c50e819&autoAuth=true&ctid=e14e73eb-5251-4388-8d67-8f9f2e2d5a46', '_blank')">
+            View Dashboard
+        </button>
+    </div>
+
+    <script>
+        function predictLayoffs() {
+            const formData = new FormData(document.getElementById("layoffForm"));
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerHTML = `<b style="color:red">${data.error}</b>`;
+                } else {
+                    document.getElementById("result").innerHTML = `<b>Predicted Layoffs:</b> ${data.predicted_layoffs}<br>
+                                                                    <b>Layoff Percentage:</b> ${data.percentage}%`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
